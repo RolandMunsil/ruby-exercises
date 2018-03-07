@@ -1,5 +1,20 @@
 require "aasm"
 
+def make_lock(type)
+  aasm "#{type}_lock".to_sym, namespace: "#{type}".to_sym do
+    state :unlocked, initial: true
+    state :locked
+
+    event "lock_#{type}".to_sym do
+      transitions to: :locked
+    end
+
+    event "unlock_#{type}".to_sym do
+      transitions to: :unlocked
+    end
+  end
+end
+
 class Door
   include AASM
 
@@ -16,29 +31,6 @@ class Door
     end
   end
 
-  aasm :deadbolt_lock, namespace: :deadbolt do
-    state :unlocked, initial: true
-    state :locked
-
-    event :lock_deadbolt do
-      transitions to: :locked
-    end
-
-    event :unlock_deadbolt do
-      transitions to: :unlocked
-    end
-  end
-
-  aasm :knob_lock, namespace: :knob do
-    state :unlocked, initial: true
-    state :locked
-
-    event :lock_knob do
-      transitions to: :locked
-    end
-
-    event :unlock_knob do
-      transitions to: :unlocked
-    end
-  end
+  make_lock("deadbolt")
+  make_lock("knob")
 end
