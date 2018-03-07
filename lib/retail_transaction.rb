@@ -39,6 +39,7 @@ class RetailTransaction
     state :processing_payment
     state :payment_declined
     state :settled
+    state :refunded
 
     event :check_out do
       transitions from: :ringing_up, to: :collecting_payment,
@@ -60,6 +61,10 @@ class RetailTransaction
 
     event :payment_declined do
       transitions from: :processing_payment, to: :payment_declined
+    end
+
+    event :refund do
+      transitions from: :settled, to: :refunded
     end
   end
 end

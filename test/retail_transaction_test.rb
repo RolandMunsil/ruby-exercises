@@ -40,6 +40,12 @@ describe RetailTransaction do
         tx.payment_info = "15 cents and a nail"
       end
     end
+
+    it "cannot refund" do
+      assert_raises do
+        tx.refund!
+      end
+    end
   end
 
   describe "collecting payment" do
@@ -88,6 +94,12 @@ describe RetailTransaction do
 
     it "cannot re-process payment" do
       assert_invalid_transition { tx.process_payment! }
+    end
+
+    it "cannot refund" do
+      assert_raises do
+        tx.refund!
+      end
     end
 
     it "can handle payment accepted" do
@@ -151,6 +163,34 @@ describe RetailTransaction do
 
     it "cannot be reopened" do
       assert_invalid_transition { tx.reopen! }
+    end
+
+    it "can be refunded" do
+      tx.refund!
+      assert_equal true, tx.refunded?
+    end
+  end
+
+  describe "that is refunded" do
+    before(:each) do
+      tx.add_item("bobcat")
+      tx.check_out!
+      tx.payment_info = "15 cents and a nail"
+      tx.process_payment!
+      tx.payment_authorized!
+      tx.refund!
+    end
+
+    it "cannot be refunded again" do
+      assert_raises do
+        tx.refund!
+      end
+    end
+
+    it "cannot be reopened" do
+      assert_raises do
+        tx.reopen!
+      end
     end
   end
 end
